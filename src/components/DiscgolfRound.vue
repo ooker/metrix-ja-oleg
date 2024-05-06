@@ -28,9 +28,10 @@
       </div>
       <template v-if="dudesData">
         <DataTable :value="dudesData" sortField="Diff" :sortOrder="1">
-          <Column field="Name" header="Nimi" sortable style="width: 50%"></Column>
-          <Column field="Diff" header="Diff" sortable style="width: 25%"></Column>
-          <Column field="Sum" header="Sum" sortable style="width: 25%"></Column>
+          <Column field="Name" header="Nimi" sortable style="width: 40%"></Column>
+          <Column field="Diff" header="Diff" sortable style="width: 20%"></Column>
+          <Column field="ClassName" header="Divikas" sortable style="width: 20%"></Column>
+          <Column field="Place" header="Koht" sortable style="width: 20%"></Column>
         </DataTable>
       </template>
     </div>
@@ -78,13 +79,17 @@
             .then(data => {
               event.value = data;
               lastUpdate.value = new Date().toString();
-              // console.log("siin on ok");
               
               dudesData.value = data.Competition.Results.filter(
-                player => findNames( dudes.value, player.Name)
-                ).sort(function (a, b) {
-                  return a.Total - b.Total;
-                });
+                player => findNames(dudes.value, player.Name)
+              );
+              dudesData.value.forEach(dude => {
+                if(dude.Diff > 0){
+                  dude.Diff = `+${dude.Diff}`
+                }
+              });
+              console.log(dudesData.value);
+
           });
         } catch (e) {
           //error.value = e;
