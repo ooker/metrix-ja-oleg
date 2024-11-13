@@ -27,10 +27,10 @@
           </div>
       </div>
       <template v-if="dudesData">
-        <DataTable :value="dudesData" sortField="Diff" :sortOrder="1">
+        <DataTable :value="dudesData" size="small" sortField="Diff" :sortOrder="1">
           <Column field="Name" header="Nimi" sortable style="width: 40%"></Column>
           <Column field="Diff" header="Diff" sortable style="width: 20%"></Column>
-          <Column field="ClassName" header="Divikas" sortable style="width: 20%"></Column>
+          <Column field="ClassName" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
           <Column field="Place" header="Koht" sortable style="width: 20%"></Column>
         </DataTable>
       </template>
@@ -80,9 +80,14 @@
               event.value = data;
               lastUpdate.value = new Date().toString();
               
-              dudesData.value = data.Competition.Results.filter(
-                player => findNames(dudes.value, player.Name)
-              );
+              if(event.value.Competition.HasSubcompetitions == 0){
+                dudesData.value = data.Competition.Results.filter(
+                  player => findNames(dudes.value, player.Name)
+                );
+              } else {
+                // what to do here?
+              }
+
               dudesData.value.forEach(dude => {
                 if(dude.Diff > 0){
                   dude.Diff = `+${dude.Diff}`
