@@ -11,6 +11,12 @@
         <Textarea v-model="dudesInput" autoResize rows="4" cols="48" />
         <Button @click="setDudes" label="MUUDA" />
       </div>
+      <div class="flex flex-col gap-2">
+        <div v-for="(member,i) of club" :key="`member+${i}`" class="flex items-center gap-2">
+          <Checkbox v-model="dudes" :inputId="`member+${i}`" name="`member+${i}`" :value="member" />
+          <label :for="`member+${i}`">{{ member }}</label>
+        </div>
+      </div>
     </div>
   </Sidebar>
   
@@ -26,11 +32,11 @@
 
       <template v-if="filteredDudesData.length > 0"> 
         <div v-for="player in filteredDudesData" :key="player.name">
-          <h2>{{ player.name }}</h2>
+          <h2 class="text-lg font-bold">{{ player.name }}</h2>
           <DataTable :value="player.rounds" size="small" sortField="Diff" :sortOrder="1">
             <Column field="RoundName" header="Round" sortable style="width: 40%">
               <template #body="slotProps">
-                {{ slotProps.data.RoundName || `Round ${slotProps.$index + 1}` }}
+                <p class="text-sm">{{ slotProps.data.RoundName || `Round ${slotProps.$index + 1}` }}</p>
               </template>
             </Column>
             <Column field="Diff" header="Diff" sortable style="width: 20%">
@@ -61,6 +67,7 @@
 import { ref, onMounted, computed } from 'vue';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
+import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
 import InputNumber from 'primevue/inputnumber';
 import Sidebar from 'primevue/sidebar';
@@ -68,6 +75,9 @@ import Textarea from 'primevue/textarea';
 
 const event = ref(null);
 const eventInput = ref(null);
+const club = ref([
+  'Andrus Naulainen', 'Ulla Volke', 'Madis Vaher', 'Oleg Tsernobrovkin', 'Uku Volke', 'Priit Raamat', 'Mikk Sepp', 'Ragnar Lall', 'Oliver Maaker', 'Veljo Volke', 'Ervin Lember', 'Sander Lember', 'andro tsernobrovkin', 'Ivo Raamat', 'Gerdo Piirma', 'Ege Sepp', 'Kristjan Jansen', 'Urmas Oja', 'Urmo Saar', 'Samuel Oja', 'Andres Berens', 'Daniel Maaker'
+]); 
 const dudes = ref([]); 
 const dudesInput = ref(null);
 const lastUpdate = ref("");
