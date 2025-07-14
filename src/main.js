@@ -3,13 +3,17 @@ import './style.css'
 import App from './App.vue'
 import PrimeVue from 'primevue/config';
 // import Lara from '@/presets/lara';
-import Lara from './presets/lara';
+// import Lara from './presets/lara';
+import Lara from '@primeuix/themes/lara';
 // import Wind from './presets/wind/index.js';
 
 const app = createApp(App);
 app.use(PrimeVue, {
-    unstyled: true,
-    pt: Lara
+    // unstyled: true,
+    // pt: Lara
+    theme: {
+        preset: Lara
+    }
 });
 app.mount("#app");
 

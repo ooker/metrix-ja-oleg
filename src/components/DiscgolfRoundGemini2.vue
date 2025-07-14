@@ -1,5 +1,6 @@
 <template class="relative">
-  <Sidebar v-model:visible="showMenu" header="Seaded" position="bottom" style="height: auto">
+  <Drawer v-model:visible="showMenu" header="Seaded" position="bottom" style="height: auto">
+  <!-- <Sidebar v-model:visible="showMenu" header="Seaded" position="bottom" style="height: auto"> -->
     <div class="flex gap-8 justify-around">
       <div class="flex flex-col gap-2">
         <label for="input-competition"><b>Võistlus</b> <small>(Metrixi ID)</small></label>
@@ -18,7 +19,8 @@
         </div>
       </div>
     </div>
-  </Sidebar>
+    </Drawer>
+  <!-- </Sidebar> -->
   
   <section class="relative">
     <div v-if="event">
@@ -31,9 +33,9 @@
       </div>
 
       <template v-if="filteredDudesData.length > 0"> 
-        <div v-for="player in filteredDudesData" :key="player.name">
-          <h2 class="text-lg font-bold">{{ player.name }}</h2>
-          <DataTable :value="player.rounds" size="small" sortField="Diff" :sortOrder="1">
+        
+          
+          <!-- <DataTable :value="player.rounds" size="small" sortField="Diff" :sortOrder="1">
             <Column field="RoundName" header="Round" sortable style="width: 40%">
               <template #body="slotProps">
                 <p class="text-sm">{{ slotProps.data.RoundName || `Round ${slotProps.$index + 1}` }}</p>
@@ -46,8 +48,23 @@
             </Column>
             <Column field="ClassName" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
             <Column field="Place" header="Koht" sortable style="width: 20%"></Column>
+          </DataTable> -->
+          <DataTable :value="filteredDudesData" size="small" sortField="Diff" :sortOrder="1">
+            <Column field="name" header="Nimi" sortable style="width: 35%">
+              <template #body="slotProps">
+                <p class="text-sm">{{ slotProps.data.name }}</p>
+              </template>
+            </Column>
+            <Column field="totalDiff" header="Diff" sortable style="width: 15%">
+              <template #body="slotProps">
+                {{ slotProps.data.totalDiff > 0 ? '+' + slotProps.data.totalDiff : slotProps.data.totalDiff }}
+              </template>
+            </Column>
+            <Column field="totalPlace" header="Koht" sortable style="width: 15%"></Column>
+            <Column field="totalSum" header="Viskeid" sortable style="width: 15%" class="truncate text-ellipsis"></Column>
+            <Column field="division" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
           </DataTable>
-        </div>
+        
       </template>
       <p v-else>No matching players found.</p> 
     </div>
@@ -69,6 +86,7 @@ import Button from 'primevue/button';
 import Column from 'primevue/column';
 import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
+import Drawer from 'primevue/drawer';
 import InputNumber from 'primevue/inputnumber';
 import Sidebar from 'primevue/sidebar';
 import Textarea from 'primevue/textarea';
@@ -96,6 +114,9 @@ const filteredDudesData = computed(() => {
         if (!players[playerName]) {
           players[playerName] = {
             name: playerResult.Name,
+            //total: 0,
+            //diff: 0,
+            //position: 0,
             rounds: []
           };
         }
@@ -112,6 +133,30 @@ const filteredDudesData = computed(() => {
       processResults(subCompetition.Results, subCompetition.Name); // Pass sub-competition name
     });
   }
+
+  function calculateTotalScores(playersObject) {
+    for (const playerName in playersObject) {
+        if (playersObject.hasOwnProperty(playerName)) {
+            const player = playersObject[playerName];
+            let currentDiff = 0;
+            let currentSum = 0;
+
+            for (const round of player.rounds) {
+              currentDiff += round.Diff;
+              currentSum += round.Sum;
+            }
+            player.totalDiff = currentDiff;
+            player.totalSum = currentSum;
+            
+            player.totalPlace = player.rounds.at(-1).Place;
+            player.division = player.rounds.at(-1).ClassName;
+        }
+    }
+}
+
+// Call the function to calculate and update scores
+calculateTotalScores(players);
+
   console.log(players);
   // return players;
   return Object.values(players);
@@ -125,6 +170,7 @@ const fetchData = async () => {
     const data = await response.json();
 
     event.value = data;
+    //console.log(data);
     lastUpdate.value = new Date().toString();
 
     // Format Diff after fetching data
