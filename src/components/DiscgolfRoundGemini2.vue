@@ -1,5 +1,5 @@
 <template class="relative">
-  <Drawer v-model:visible="showMenu" header="Seaded" position="bottom" style="height: auto">
+  <Drawer v-model:visible="showMenu" header="Seaded" position="bottom" style="height: 100vh">
   <!-- <Sidebar v-model:visible="showMenu" header="Seaded" position="bottom" style="height: auto"> -->
     <div class="flex gap-8 justify-around">
       <div class="flex flex-col gap-2">
@@ -35,26 +35,10 @@
       <template v-if="filteredDudesData.length > 0"> 
         
           
-          <!-- <DataTable :value="player.rounds" size="small" sortField="Diff" :sortOrder="1">
-            <Column field="RoundName" header="Round" sortable style="width: 40%">
-              <template #body="slotProps">
-                <p class="text-sm">{{ slotProps.data.RoundName || `Round ${slotProps.$index + 1}` }}</p>
-              </template>
-            </Column>
-            <Column field="Diff" header="Diff" sortable style="width: 20%">
-              <template #body="slotProps">
-                {{ slotProps.data.Diff > 0 ? '+' + slotProps.data.Diff : slotProps.data.Diff }}
-              </template>
-            </Column>
-            <Column field="ClassName" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
-            <Column field="Place" header="Koht" sortable style="width: 20%"></Column>
-          </DataTable> -->
-          <DataTable :value="filteredDudesData" size="small" sortField="Diff" :sortOrder="1">
-            <Column field="name" header="Nimi" sortable style="width: 35%">
-              <template #body="slotProps">
-                <p class="text-sm">{{ slotProps.data.name }}</p>
-              </template>
-            </Column>
+        <DataTable :value="filteredDudesData" v-model:expandedRows="expandedRows" dataKey="name"
+        @rowExpand="onRowExpand" @rowCollapse="onRowCollapse" sortField="totalDiff" :sortOrder="1" sortMode="multiple">
+          <Column expander style="width: 3rem" /> 
+          <Column field="name" header="Nimi" sortable style="width: calc(35% - 3rem)"></Column>
             <Column field="totalDiff" header="Diff" sortable style="width: 15%">
               <template #body="slotProps">
                 {{ slotProps.data.totalDiff > 0 ? '+' + slotProps.data.totalDiff : slotProps.data.totalDiff }}
@@ -63,6 +47,23 @@
             <Column field="totalPlace" header="Koht" sortable style="width: 15%"></Column>
             <Column field="totalSum" header="Viskeid" sortable style="width: 15%" class="truncate text-ellipsis"></Column>
             <Column field="division" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
+            
+            <template #expansion="slotProps">
+                    <DataTable :value="slotProps.data.rounds">
+                        <Column style="width: 3rem" headerStyle="display:none;"></Column> 
+                        <Column field="RoundName" style="width: calc(35% - 3rem)" headerStyle="display:none;"></Column> 
+                        <Column field="Diff" style="width: 15%" headerStyle="display:none;"></Column>
+                        <Column field="Place" style="width: 15%" headerStyle="display:none;"></Column>
+                        <Column field="Sum" style="width: 15%" headerStyle="display:none;"></Column>
+                        <Column style="width: 20%" headerStyle="display:none;"></Column> 
+                        <!-- <Column field="amount" header="Amount" >
+                            <template #body="slotProps">
+                                {{ formatCurrency(slotProps.data.amount) }}
+                            </template>
+                        </Column> -->
+                        
+                    </DataTable>
+            </template>
           </DataTable>
         
       </template>
@@ -88,7 +89,6 @@ import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
 import Drawer from 'primevue/drawer';
 import InputNumber from 'primevue/inputnumber';
-import Sidebar from 'primevue/sidebar';
 import Textarea from 'primevue/textarea';
 
 const event = ref(null);
