@@ -13,13 +13,14 @@
         <Button @click="setDudes" label="MUUDA" />
       </div>
       <div class="flex flex-col gap-2">
-        <div v-for="(member,i) of club" :key="`member+${i}`" class="flex items-center gap-2">
+        <Listbox v-model="selectedDudes" :options="club" multiple class="w-full md:w-56" listStyle="max-height:80vh" />
+        <!-- <div v-for="(member,i) of club" :key="`member+${i}`" class="flex items-center gap-2">
           <Checkbox v-model="dudes" :inputId="`member+${i}`" name="`member+${i}`" :value="member" />
           <label :for="`member+${i}`">{{ member }}</label>
-        </div>
+        </div> -->
       </div>
     </div>
-    </Drawer>
+  </Drawer>
   <!-- </Sidebar> -->
   
   <section class="relative">
@@ -36,33 +37,34 @@
         
           
         <DataTable :value="filteredDudesData" v-model:expandedRows="expandedRows" dataKey="name"
-        @rowExpand="onRowExpand" @rowCollapse="onRowCollapse" sortField="totalDiff" :sortOrder="1" sortMode="multiple">
+        @rowExpand="onRowExpand" @rowCollapse="onRowCollapse" sortField="totalDiff" :sortOrder="1" >
           <Column expander style="width: 3rem" /> 
           <Column field="name" header="Nimi" sortable style="width: calc(35% - 3rem)"></Column>
             <Column field="totalDiff" header="Diff" sortable style="width: 15%">
               <template #body="slotProps">
                 {{ slotProps.data.totalDiff > 0 ? '+' + slotProps.data.totalDiff : slotProps.data.totalDiff }}
               </template>
-            </Column>
-            <Column field="totalPlace" header="Koht" sortable style="width: 15%"></Column>
-            <Column field="totalSum" header="Viskeid" sortable style="width: 15%" class="truncate text-ellipsis"></Column>
-            <Column field="division" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
+          </Column>
+          <Column field="totalPlace" header="Koht" sortable style="width: 15%"></Column>
+          <Column field="totalSum" header="Viskeid" sortable style="width: 15%" class="truncate text-ellipsis"></Column>
+          <Column field="division" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
             
-            <template #expansion="slotProps">
-                    <DataTable :value="slotProps.data.rounds">
+          <template #expansion="slotProps">
+            <div style="transform:translateY(0.5rem)">
+                    <DataTable :value="slotProps.data.rounds" tableStyle="opacity:0.6">
                         <Column style="width: 3rem" headerStyle="display:none;"></Column> 
-                        <Column field="RoundName" style="width: calc(35% - 3rem)" headerStyle="display:none;"></Column> 
-                        <Column field="Diff" style="width: 15%" headerStyle="display:none;"></Column>
-                        <Column field="Place" style="width: 15%" headerStyle="display:none;"></Column>
-                        <Column field="Sum" style="width: 15%" headerStyle="display:none;"></Column>
-                        <Column style="width: 20%" headerStyle="display:none;"></Column> 
-                        <!-- <Column field="amount" header="Amount" >
-                            <template #body="slotProps">
-                                {{ formatCurrency(slotProps.data.amount) }}
-                            </template>
-                        </Column> -->
-                        
+                        <Column field="RoundName" style="width: calc(35% - 3rem); padding-top:0.25rem; padding-bottom:0.25rem;" 
+                          headerStyle="display:none;"></Column> 
+                        <Column field="Diff" style="width: 15%; padding-top:0.25rem; padding-bottom:0.25rem;" 
+                          headerStyle="display:none;"></Column>
+                        <Column field="Place" style="width: 15%; padding-top:0.25rem; padding-bottom:0.25rem;" 
+                          headerStyle="display:none;"></Column>
+                        <Column field="Sum" style="width: 15%; padding-top:0.25rem; padding-bottom:0.25rem;" 
+                          headerStyle="display:none;"></Column>
+                        <Column style="width: 20%" 
+                          headerStyle="display:none;">pss</Column> 
                     </DataTable>
+                    </div>
             </template>
           </DataTable>
         
@@ -85,18 +87,20 @@
 import { ref, onMounted, computed } from 'vue';
 import Button from 'primevue/button';
 import Column from 'primevue/column';
-import Checkbox from 'primevue/checkbox';
+// import Checkbox from 'primevue/checkbox';
 import DataTable from 'primevue/datatable';
 import Drawer from 'primevue/drawer';
 import InputNumber from 'primevue/inputnumber';
+import Listbox from 'primevue/listbox';
 import Textarea from 'primevue/textarea';
 
 const event = ref(null);
 const eventInput = ref(null);
 const club = ref([
-  'Andrus Naulainen', 'Ulla Volke', 'Madis Vaher', 'Oleg Tsernobrovkin', 'Uku Volke', 'Priit Raamat', 'Mikk Sepp', 'Ragnar Lall', 'Oliver Maaker', 'Veljo Volke', 'Ervin Lember', 'Sander Lember', 'andro tsernobrovkin', 'Ivo Raamat', 'Gerdo Piirma', 'Ege Sepp', 'Kristjan Jansen', 'Urmas Oja', 'Urmo Saar', 'Samuel Oja', 'Andres Berens', 'Daniel Maaker'
+  'Andres Berens', 'andro tsernobrovkin', 'Andrus Naulainen', 'Daniel Maaker', 'Ege Sepp', 'Ervin Lember', 'Gerdo Piirma', 'Ivo Raamat', 'Kristjan Jansen', 'Madis Vaher', 'Mikk Sepp', 'Oleg Tsernobrovkin', 'Oliver Maaker', 'Priit Raamat', 'Ragnar Lall', 'Samuel Oja', 'Sander Lember', 'Urmas Oja', 'Urmo Saar', 'Uku Volke', 'Ulla Volke', 'Veljo Volke'
 ]); 
 const dudes = ref([]); 
+const selectedDudes = ref([]); 
 const dudesInput = ref(null);
 const lastUpdate = ref("");
 const showMenu = ref(false);
