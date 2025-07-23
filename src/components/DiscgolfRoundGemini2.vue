@@ -7,13 +7,12 @@
         <InputNumber v-model="eventInput" inputId="input-competition" :useGrouping="false" />
         <Button @click="setEvent" label="MUUDA" /> 
       </div>
+      
       <div class="flex flex-col gap-2">
-        <label for="input-players"><b>Mängijad</b> <small>(eralda komadega)</small></label>
-        <Textarea v-model="dudesInput" autoResize rows="4" cols="48" />
+        <label for="input-players"><b>Mina ja Oleg</b></label>
+        <Listbox v-model="dudes" :options="club" multiple checkmark class="w-full md:w-56" listStyle="max-height:80vh" />
         <Button @click="setDudes" label="MUUDA" />
-      </div>
-      <div class="flex flex-col gap-2">
-        <Listbox v-model="selectedDudes" :options="club" multiple class="w-full md:w-56" listStyle="max-height:80vh" />
+
         <!-- <div v-for="(member,i) of club" :key="`member+${i}`" class="flex items-center gap-2">
           <Checkbox v-model="dudes" :inputId="`member+${i}`" name="`member+${i}`" :value="member" />
           <label :for="`member+${i}`">{{ member }}</label>
@@ -35,9 +34,10 @@
 
       <template v-if="filteredDudesData.length > 0"> 
         
-          
+          <!-- @rowExpand="onRowExpand" @rowCollapse="onRowCollapse"  -->
         <DataTable :value="filteredDudesData" v-model:expandedRows="expandedRows" dataKey="name"
-        @rowExpand="onRowExpand" @rowCollapse="onRowCollapse" sortField="totalDiff" :sortOrder="1" >
+          
+          sortField="totalDiff" :sortOrder="1" sortMode="single" >
           <Column expander style="width: 3rem" /> 
           <Column field="name" header="Nimi" sortable style="width: calc(35% - 3rem)"></Column>
             <Column field="totalDiff" header="Diff" sortable style="width: 15%">
@@ -50,7 +50,7 @@
           <Column field="division" header="Divikas" sortable style="width: 20%" class="truncate text-ellipsis"></Column>
             
           <template #expansion="slotProps">
-            <div style="transform:translateY(0.5rem)">
+            <div style="transform:translateY(-1rem)">
                     <DataTable :value="slotProps.data.rounds" tableStyle="opacity:0.6">
                         <Column style="width: 3rem" headerStyle="display:none;"></Column> 
                         <Column field="RoundName" style="width: calc(35% - 3rem); padding-top:0.25rem; padding-bottom:0.25rem;" 
@@ -74,7 +74,7 @@
 
     <div class="flex flex-col items-center p-8 gap-4">
       <div class="text-sm italic">Viimased andmed: {{ lastUpdate }}</div>
-      <Button @click="fetchData" v-if="eventInput && dudesInput" label="Uuenda" />
+      <Button @click="fetchData" v-if="eventInput" label="Uuenda" />
     </div>
     
     <div class="fixed right-8 bottom-8">
@@ -92,7 +92,7 @@ import DataTable from 'primevue/datatable';
 import Drawer from 'primevue/drawer';
 import InputNumber from 'primevue/inputnumber';
 import Listbox from 'primevue/listbox';
-import Textarea from 'primevue/textarea';
+
 
 const event = ref(null);
 const eventInput = ref(null);
@@ -100,8 +100,6 @@ const club = ref([
   'Andres Berens', 'andro tsernobrovkin', 'Andrus Naulainen', 'Daniel Maaker', 'Ege Sepp', 'Ervin Lember', 'Gerdo Piirma', 'Ivo Raamat', 'Kristjan Jansen', 'Madis Vaher', 'Mikk Sepp', 'Oleg Tsernobrovkin', 'Oliver Maaker', 'Priit Raamat', 'Ragnar Lall', 'Samuel Oja', 'Sander Lember', 'Urmas Oja', 'Urmo Saar', 'Uku Volke', 'Ulla Volke', 'Veljo Volke'
 ]); 
 const dudes = ref([]); 
-const selectedDudes = ref([]); 
-const dudesInput = ref(null);
 const lastUpdate = ref("");
 const showMenu = ref(false);
 
@@ -118,13 +116,10 @@ const filteredDudesData = computed(() => {
         if (!players[playerName]) {
           players[playerName] = {
             name: playerResult.Name,
-            //total: 0,
-            //diff: 0,
-            //position: 0,
             rounds: []
           };
         }
-        playerResult.RoundName = roundName; // Add round name to the result
+        playerResult.RoundName = roundName;
         players[playerName].rounds.push(playerResult);
       }
     });
@@ -134,35 +129,29 @@ const filteredDudesData = computed(() => {
     processResults(event.value.Competition.Results);
   } else {
     event.value.Competition.SubCompetitions.forEach(subCompetition => {
-      processResults(subCompetition.Results, subCompetition.Name); // Pass sub-competition name
+      processResults(subCompetition.Results, subCompetition.Name); 
     });
   }
 
   function calculateTotalScores(playersObject) {
     for (const playerName in playersObject) {
-        if (playersObject.hasOwnProperty(playerName)) {
-            const player = playersObject[playerName];
-            let currentDiff = 0;
-            let currentSum = 0;
-
-            for (const round of player.rounds) {
-              currentDiff += round.Diff;
-              currentSum += round.Sum;
-            }
-            player.totalDiff = currentDiff;
-            player.totalSum = currentSum;
-            
-            player.totalPlace = player.rounds.at(-1).Place;
-            player.division = player.rounds.at(-1).ClassName;
+      if (playersObject.hasOwnProperty(playerName)) {
+        const player = playersObject[playerName];
+        let currentDiff = 0;
+        let currentSum = 0;
+        for (const round of player.rounds) {
+          currentDiff += round.Diff;
+          currentSum += round.Sum;
         }
+        player.totalDiff = currentDiff;
+        player.totalSum = currentSum;
+        player.totalPlace = player.rounds.at(-1).Place;
+        player.division = player.rounds.at(-1).ClassName;
+      }
     }
-}
+  }
 
-// Call the function to calculate and update scores
-calculateTotalScores(players);
-
-  console.log(players);
-  // return players;
+  calculateTotalScores(players);
   return Object.values(players);
 });
 
@@ -195,8 +184,7 @@ const setEvent = () => {
 };
 
 const setDudes = () => {
-  localStorage.setItem("savedDudes", dudesInput.value);
-  dudes.value = dudesInput.value.split(",").map(dude => dude.trim()); 
+  localStorage.setItem("savedDudes", JSON.stringify(dudes.value));
   fetchData();
 };
 
@@ -205,15 +193,22 @@ const getEvent = () => {
 };
 
 const getDudes = () => {
-  dudesInput.value = localStorage.getItem("savedDudes");
-  if (dudesInput.value) {
-    dudes.value = dudesInput.value.split(",").map(dude => dude.trim()); 
-  }
+  const savedDudes = localStorage.getItem("savedDudes");
+    dudes.value = JSON.parse(savedDudes); 
+    // dudes.value = savedDudes.split(",").map(dude => dude.trim()); 
+    // console.log(dudes.value);
+    
+      // fetchData();
 };
 
 const getStuffReady = () => {
   getEvent();
   getDudes();
+  if(eventInput.value && dudes.value){
+    fetchData();
+  } else {
+    showMenu.value = true;
+  }
 };
 
 onMounted(getStuffReady);
